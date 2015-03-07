@@ -1,9 +1,11 @@
 from flask import Flask,send_file
 import generator
+import logging
 
 app = Flask(__name__)
 app.debug = True
 
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/')
 def fractal_example():

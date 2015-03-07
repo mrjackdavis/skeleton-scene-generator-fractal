@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import math
 import cairocffi as cairo
+import logging
 
 def generateExample():
 	print("Hello world")
 
-	WIDTH, HEIGHT = 256, 256
+	WIDTH, HEIGHT, ITERATIONS = 1000, 1000, 100
 
 	surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
 	ctx = cairo.Context (surface)
@@ -20,20 +21,32 @@ def generateExample():
 	ctx.set_source (pat)
 	ctx.fill ()
 
-	ctx.translate (0.1, 0.1) # Changing the current transformation matrix
+	ctx.move_to (0.5, 1)
 
-	ctx.move_to (0, 0)
-	ctx.arc (0.2, 0.1, 0.1, -math.pi/2, 0) # Arc(cx, cy, radius, start_angle, stop_angle)
-	ctx.line_to (0.5, 0.1) # Line to (x,y)
-	ctx.curve_to (0.5, 0.2, 0.5, 0.4, 0.2, 0.8) # Curve(x1, y1, x2, y2, x3, y3)
-	ctx.close_path ()
+	i = 0
+	while (i < ITERATIONS):
+		Iterate(ctx)
+		i = i + 1 
+		pass
 
 	ctx.set_source_rgb (0.3, 0.2, 0.5) # Solid color
-	ctx.set_line_width (0.02)
+	ctx.set_line_width (0.005)
 	ctx.stroke ()
-
+	
 	fileLocation = "/app/example.png";
 
 	surface.write_to_png (fileLocation) # Output to PNG
 
 	return fileLocation
+
+def Iterate(ctx):
+	x,y = ctx.get_current_point()
+
+	newY = y-0.01
+	newX = x
+
+	logging.debug(x)
+	logging.warning('(%s,%s) to (%s,%s)',x,y,newX,newY)
+
+	ctx.line_to (newX, newY) # Line to (x,y)
+	ctx.move_to (newX, newY)

@@ -23,11 +23,7 @@ def generateExample():
 
 	ctx.move_to (0.5, 1)
 
-	i = 0
-	while (i < ITERATIONS):
-		Iterate(ctx)
-		i = i + 1 
-		pass
+	Iterate(ctx,1,ITERATIONS)
 
 	ctx.set_source_rgb (0.3, 0.2, 0.5) # Solid color
 	ctx.set_line_width (0.005)
@@ -39,7 +35,7 @@ def generateExample():
 
 	return fileLocation
 
-def Iterate(ctx):
+def Iterate(ctx,current,max):
 	x,y = ctx.get_current_point()
 
 	newY = y-0.01
@@ -50,3 +46,6 @@ def Iterate(ctx):
 
 	ctx.line_to (newX, newY) # Line to (x,y)
 	ctx.move_to (newX, newY)
+
+	if current <= max:
+		Iterate(ctx,current +1,max)

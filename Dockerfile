@@ -5,8 +5,8 @@ RUN apt-get update
 RUN pip install cairocffi
 RUN pip install Flask
 
-ADD ./main.py /main.py
+ADD ./src/main.py /app/main.py
 
-CMD [ "python", "/main.py" ]
+CMD [ "python", "/app/main.py" ]
 
 EXPOSE 5000

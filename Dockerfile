@@ -5,7 +5,7 @@ RUN apt-get update
 RUN pip install cairocffi
 RUN pip install Flask
 
-ADD ./src/main.py /app/main.py
+ADD ./src/* /app/
 
 CMD [ "python", "/app/main.py" ]
 

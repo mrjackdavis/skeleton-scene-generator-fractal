@@ -6,7 +6,7 @@ import logging
 def generateExample():
 	print("Hello world")
 
-	WIDTH, HEIGHT, ITERATIONS = 1000, 1000, 100
+	WIDTH, HEIGHT, ITERATIONS = 1000, 1000, 15
 
 	surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
 	ctx = cairo.Context (surface)
@@ -21,12 +21,10 @@ def generateExample():
 	ctx.set_source (pat)
 	ctx.fill ()
 
-	ctx.move_to (0.5, 1)
-
-	Iterate(ctx,1,ITERATIONS)
+	Iterate(ctx,1,ITERATIONS,0.5, 1,0)
 
 	ctx.set_source_rgb (0.3, 0.2, 0.5) # Solid color
-	ctx.set_line_width (0.005)
+	ctx.set_line_width (0.0005)
 	ctx.stroke ()
 	
 	fileLocation = "/app/example.png";
@@ -35,17 +33,19 @@ def generateExample():
 
 	return fileLocation
 
-def Iterate(ctx,current,max):
-	x,y = ctx.get_current_point()
+def Iterate(ctx,current,max,x,y,xMod):
+	ctx.move_to (x, y)
 
-	newY = y-0.01
-	newX = x
+	length = 0.06
+	modD = 0.15
+	newY = y-length
+	newX = x + length*xMod
 
 	logging.debug(x)
-	logging.warning('(%s,%s) to (%s,%s)',x,y,newX,newY)
+	logging.warning('(%s,%s) to (%s,%s) at %s',x,y,newX,newY,current)
 
 	ctx.line_to (newX, newY) # Line to (x,y)
-	ctx.move_to (newX, newY)
 
 	if current <= max:
-		Iterate(ctx,current +1,max)
+		Iterate(ctx,current +1,max,newX,newY,xMod+modD)
+		Iterate(ctx,current +1,max,newX,newY,xMod-modD)

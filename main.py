@@ -1,4 +1,9 @@
-def say_hello_to(name):
-    print("Hello %s!" % name)
+from flask import Flask
+app = Flask(__name__)
 
-say_hello_to("Jack")
+@app.route('/')
+def hello_world():
+    return 'Hello World!'
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0')

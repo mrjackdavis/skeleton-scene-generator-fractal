@@ -4,6 +4,7 @@ import urllib.request
 import os
 import generator
 import logging
+from SklItem import SklItem
 
 app = Flask(__name__)
 app.debug = True
@@ -18,6 +19,10 @@ def fractal_example():
 
 @app.route('/testapi')
 def api_test():
+	item = getItem()
+	return item.resourceData
+
+def getItem():
 	apiLocation = os.environ['API_PORT']
 
 	apiLocation = apiLocation.replace('tcp://','http://') + '/'
@@ -31,11 +36,12 @@ def api_test():
 
 	logging.debug(scenes)
 
-	resourceURL = scenes[0]['resource']['location']
-	response = urllib.request.urlopen(resourceURL)
-	data = response.read()
-	text = data.decode('utf-8')
-	return text
+	item = SklItem()
+
+	item.resourceURL = scenes[0]['resource']['location']
+	response = urllib.request.urlopen(item.resourceURL)
+	item.resourceData = response.read().decode('utf-8')
+	return item;
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

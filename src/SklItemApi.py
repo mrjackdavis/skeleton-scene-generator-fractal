@@ -17,7 +17,9 @@ class SklItemApi:
 
 		item = SklItem()
 
-		item.resourceURL = scenes[0]['resource']['location']
+		item.resourceURL = scenes[len(scenes)-1]['resource']['location']
 		response = urllib.request.urlopen(item.resourceURL)
-		item.resourceData = response.read().decode('utf-8')
+		item.resourceData = response.read()
+
+		logging.debug(item.resourceData.__class__)
 		return item;

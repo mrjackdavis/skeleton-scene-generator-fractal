@@ -15,8 +15,8 @@ sklApi = SklItemApi(apiLocation)
 
 @app.route('/example')
 def fractal_example():
-
-	fileLocation = generator.generateExample()
+	item = sklApi.GetOne()
+	fileLocation = generator.new(item)
 	return send_file(fileLocation, mimetype='image/gif')
 
 @app.route('/testapi')

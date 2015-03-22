@@ -8,8 +8,14 @@ To build the docker image, assuming docker is setup, you can run:
 
     docker build -t mrjackdavis/skeleton-scene-generator-fractal .
 
-Then to run the afformentioned image in a container, run the following:
+When running the image, the environment variable `API_PORT` must be set to the url of the skeleton scene API. This can be done by using container linking, or by specifying the variable manually.
 
-    docker rm -f skl-fractal && docker run --name skl-fractal -p 8080:5000 -d mrjackdavis/skeleton-scene-generator-fractal
+Specifying the url:
+
+    docker run --name skl-fractal -p 8080:5000 -e "API_PORT=http://api.skeletonscene.com" -d mrjackdavis/skeleton-scene-generator-fractal
+
+Container linking:
+
+    docker run --name skl-fractal -p 8080:5000 --link skl-api:api -d mrjackdavis/skeleton-scene-generator-fractal
 
 Then, you can navigate to http://localhost:8080 and voila.

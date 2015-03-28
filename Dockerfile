@@ -4,9 +4,10 @@ RUN apt-get update
 
 RUN pip install cairocffi
 RUN pip install Flask
+RUN pip install nap
 
-ADD ./main.py /main.py
+ADD ./src/* /app/
 
-CMD [ "python", "/main.py" ]
+CMD [ "python", "/app/main.py" ]
 
 EXPOSE 5000

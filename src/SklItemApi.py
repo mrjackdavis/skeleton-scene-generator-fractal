@@ -16,7 +16,8 @@ class SklItemApi:
 		sceneObjs = []
 
 		for scene in scenes:
-			item = SklItem()
+			logging.debug("scene id = %s",scene['_id'])
+			item = SklItem(scene['_id'])
 
 			item.resourceURL = scene['resource']['location']
 			logging.info('Found item with resource location "%s"',item.resourceURL)

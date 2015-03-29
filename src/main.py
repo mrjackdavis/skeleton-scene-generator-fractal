@@ -20,4 +20,4 @@ while True:
 		fileLocation = generator.new(item)
 		logging.info('Generated result for blah. Found at %s',fileLocation)
 
-	time.sleep(60)  # Delay for 1 minute (60 seconds)
+	time.sleep(10)  # Delay for 1 minute (60 seconds)

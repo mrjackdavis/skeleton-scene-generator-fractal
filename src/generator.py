@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import math
 import cairocffi as cairo
 import logging
@@ -11,28 +12,30 @@ def new(sklItem):
 
 	WIDTH, HEIGHT, ITERATIONS = 5000, 5000, 11
 
-	surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
-	ctx = cairo.Context (surface)
+	fileLocation = "/app/%s.png" % (sklItem.id)
 
-	ctx.scale (WIDTH, HEIGHT) # Normalizing the canvas
+	if os.path.isfile(fileLocation):
+		logging.warning("Cannot generate item[%s]. %s already exists",sklItem.id,fileLocation)
+	else:
+		surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
+		ctx = cairo.Context (surface)
 
-	# pat = cairo.LinearGradient (0.0, 0.0, 0.0, 1.0)
-	# pat.add_color_stop_rgba (1, 0.7, 0, 0, 0.5) # First stop, 50% opacity
-	# pat.add_color_stop_rgba (0, 0.9, 0.7, 0.2, 1) # Last stop, 100% opacity
+		ctx.scale (WIDTH, HEIGHT) # Normalizing the canvas
 
-	ctx.rectangle (0, 0, 1, 1) # Rectangle(x0, y0, x1, y1)
-	ctx.set_source_rgb (0.5,0.5,0.5)
-	ctx.fill ()
+		# pat = cairo.LinearGradient (0.0, 0.0, 0.0, 1.0)
+		# pat.add_color_stop_rgba (1, 0.7, 0, 0, 0.5) # First stop, 50% opacity
+		# pat.add_color_stop_rgba (0, 0.9, 0.7, 0.2, 1) # Last stop, 100% opacity
 
-	index = 0
-	Iterate(ctx,1,ITERATIONS,0.5, 0.5,0,sklItem)
+		ctx.rectangle (0, 0, 1, 1) # Rectangle(x0, y0, x1, y1)
+		ctx.set_source_rgb (0.5,0.5,0.5)
+		ctx.fill ()
 
-	
-	fileLocation = "/app/example.png";
+		index = 0
+		Iterate(ctx,1,ITERATIONS,0.5, 0.5,0,sklItem)
 
-	surface.write_to_png (fileLocation) # Output to PNG
+		surface.write_to_png (fileLocation) # Output to PNG
 
-	return fileLocation
+		return fileLocation
 
 def Iterate(ctx,currentLevel,maxLevel,x,y,xMod,sklItem):
 	global index
@@ -46,8 +49,7 @@ def Iterate(ctx,currentLevel,maxLevel,x,y,xMod,sklItem):
 	newY = y-length
 	newX = x + length*xMod
 
-	logging.debug('at level %s, index %s : bytePoint = %s; byte = %s; length = %s; modD = %s;',currentLevel,index,bytePoint,byte,length,modD)
-	# logging.debug('(%s,%s) to (%s,%s) at %s',x,y,newX,newY,currentLevel)
+	# logging.debug('at level %s, index %s : bytePoint = %s; byte = %s; length = %s; modD = %s;',currentLevel,index,bytePoint,byte,length,modD)
 
 	ctx.line_to (newX, newY) # Line to (x,y)
 

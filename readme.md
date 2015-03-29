@@ -19,3 +19,7 @@ Container linking:
     docker run --name skl-fractal -p 8080:5000 --link skl-api:api -d mrjackdavis/skeleton-scene-generator-fractal
 
 Then, you can navigate to http://localhost:8080 and voila.
+
+You can also mount `./src/` into the container so that it doesn't need to be re-run every time you make a change. You can do this by adding the following parameter:
+
+    -v $(pwd)/src/:/app/

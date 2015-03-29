@@ -18,6 +18,6 @@ while True:
 
 	for item in items:
 		fileLocation = generator.new(item)
-		send_file(fileLocation, mimetype='image/gif')
+		logging.info('Generated result for blah. Found at %s',fileLocation)
 
 	time.sleep(60)  # Delay for 1 minute (60 seconds)

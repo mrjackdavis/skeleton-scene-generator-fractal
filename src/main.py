@@ -24,4 +24,5 @@ while True:
 
 		logging.info('Generated result for blah. Found at %s',fileLocation)
 
-	time.sleep(10)  # Delay for 1 minute (60 seconds)
+	logging.info("Sleeping for 10...")
+	time.sleep(10)

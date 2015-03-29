@@ -16,6 +16,8 @@ def new(sklItem):
 	if os.path.isfile(fileLocation):
 		logging.warning("Cannot generate item[%s]. %s already exists",sklItem.id,fileLocation)
 	else:
+		sklItem.resourceData = sklItem.GetData()
+
 		surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
 		ctx = cairo.Context (surface)
 

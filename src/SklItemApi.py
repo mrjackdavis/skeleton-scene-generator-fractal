@@ -14,25 +14,42 @@ class SklItemApi:
 
 	def GetAllNew(self):
 		# Get scenes
+		allScenes = self.GetAll()
+		newScenes = []
+
+		# If any scenes have complete processes, then they aren't new
+		for scene in allScenes:
+			isNew = True
+			for process in scene.processes:
+				if process.status == "Complete":
+					isNew = False
+					break
+
+			if isNew == True:
+				logging.info('Scene %s is new. Queuing for processing', scene.id)
+				newScenes.append(scene)
+
+		return newScenes
+
+
+	def GetAll(self):
+		# Get scenes
 		scenes = self.api.get('scene').json()
 
 		sceneObjs = []
 
 		for scene in scenes:
-			item = SklItem(scene['_id'])
+			item = SklItem(scene['_id'],scene['resource']['location'])
 
-			item.resourceURL = scene['resource']['location']
 			logging.info('Found item with resource location "%s"',item.resourceURL)
 
-			try:
-				response = urllib.request.urlopen(item.resourceURL)
-				item.resourceData = response.read()
+			i = 0
+			for process in scene['processes']:
+				processItem = SklProcess(i,item,process["status"])
+				i = i+1
+				item.processes.append(processItem)
 
-				sceneObjs.append(item)
-				pass
-			except:
-				logging.warning('Unable to retrieve data for request %s',item.id)
-				pass
+			sceneObjs.append(item)
 
 		return sceneObjs
 
@@ -46,7 +63,11 @@ class SklItemApi:
 
 		logging.debug("Starting process %s",response.headers["location"])
 
-		return SklProcess(processId,sklItem)
+		processItem = SklProcess(processId,sklItem,"InProgress")
+
+		sklItem.processes.append(processItem)
+
+		return processItem
 
 	# def FailProcessing(self,process):
 	# 	response = self.api.put('scene/%s/processes/%s' % (sklItem.processes), data={'status': 'Failed'})

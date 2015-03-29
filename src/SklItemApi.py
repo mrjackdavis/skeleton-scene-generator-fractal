@@ -9,17 +9,21 @@ class SklItemApi:
 		self.apiUrl = url
 		self.api = Url(self.apiUrl)
 
-	def GetOne(self):
+	def GetAllNew(self):
 		# Get scenes
 		scenes = self.api.get('scene').json()
 
-		logging.debug(scenes)
+		sceneObjs = []
 
-		item = SklItem()
+		for scene in scenes:
+			item = SklItem()
 
-		item.resourceURL = scenes[len(scenes)-1]['resource']['location']
-		response = urllib.request.urlopen(item.resourceURL)
-		item.resourceData = response.read()
+			item.resourceURL = scene['resource']['location']
+			logging.info('Found item with resource location "%s"',item.resourceURL)
 
-		logging.debug(item.resourceData.__class__)
-		return item;
+			response = urllib.request.urlopen(item.resourceURL)
+			item.resourceData = response.read()
+
+			sceneObjs.append(item)
+
+		return sceneObjs;

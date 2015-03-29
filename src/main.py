@@ -1,11 +1,8 @@
-from flask import Flask,send_file
 import os
+import time
 import generator
 import logging
 from SklItemApi import SklItemApi
-
-app = Flask(__name__)
-app.debug = True
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -13,17 +10,14 @@ logging.basicConfig(level=logging.DEBUG)
 apiLocation = os.environ['API_PORT'].replace('tcp://','http://') + '/'
 sklApi = SklItemApi(apiLocation)
 
-@app.route('/example')
-def fractal_example():
-	item = sklApi.GetOne()
-	fileLocation = generator.new(item)
-	return send_file(fileLocation, mimetype='image/gif')
+while True:
+	logging.info('Checking for new requests')
+	items = sklApi.GetAllNew()
 
-@app.route('/testapi')
-def api_test():
-	item = sklApi.GetOne()
+	logging.info('Found %s new requests',len(items))
 
-	return item.resourceData
+	for item in items:
+		fileLocation = generator.new(item)
+		send_file(fileLocation, mimetype='image/gif')
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+	time.sleep(60)  # Delay for 1 minute (60 seconds)

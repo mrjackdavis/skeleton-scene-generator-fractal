@@ -1,4 +1,3 @@
-import urllib.request
 import logging
 import json
 from nap.url import Url

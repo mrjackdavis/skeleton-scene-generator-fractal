@@ -8,7 +8,6 @@ index = 0
 
 def new(sklItem):
 	global index
-	print("Hello world")
 
 	WIDTH, HEIGHT, ITERATIONS = 5000, 5000, 11
 

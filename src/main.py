@@ -17,7 +17,11 @@ while True:
 	logging.info('Found %s new requests',len(items))
 
 	for item in items:
+		process = sklApi.StartProcessing(item)
 		fileLocation = generator.new(item)
+
+		sklApi.CompleteProcessing(process)
+
 		logging.info('Generated result for blah. Found at %s',fileLocation)
 
 	time.sleep(10)  # Delay for 1 minute (60 seconds)

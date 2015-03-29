@@ -76,7 +76,7 @@ class SklItemApi:
 		processUrl = 'scene/%s/processes/%s' % (sklProcess.sklItem.id,sklProcess.id)
 		logging.debug('Marking process %s as complete',processUrl)
 
-		response = self.api.put(processUrl, data=json.dumps({'status': 'Complete','result': '%s.png' % (sklProcess.sklItem.id)}),headers=self.jsonHeader)
+		response = self.api.put(processUrl, data=json.dumps({'status': 'Complete','result': '%s' % (sklProcess.result)}),headers=self.jsonHeader)
 
 		if response.status_code != 200:
 			raise Exception('Completing item %s, process %s; failed with status code %s' % (sklProcess.sklItem.id,sklProcess.id,response.status_code))

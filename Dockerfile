@@ -4,6 +4,7 @@ RUN apt-get update
 
 RUN pip install cairocffi
 RUN pip install nap
+RUN pip install boto
 
 ADD ./src/* /app/
 

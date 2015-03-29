@@ -6,17 +6,21 @@ import logging
 
 index = 0
 
-def new(sklItem):
+def new(sklProcess):
+	sklItem = sklProcess.sklItem
 	global index
 
 	WIDTH, HEIGHT, ITERATIONS = 5000, 5000, 11
 
-	fileLocation = "/app/%s.png" % (sklItem.id)
+	fileLocation = "/app/%s-%s.png" % (sklItem.id,sklProcess.id)
 
 	if os.path.isfile(fileLocation):
 		logging.warning("Cannot generate item[%s]. %s already exists",sklItem.id,fileLocation)
 	else:
+		logging.info("Getting URL data for scene %s from %s",sklItem.id, sklItem.resourceURL)
 		sklItem.resourceData = sklItem.GetData()
+
+		logging.info("Creating fractal for %s:%s",sklItem.id, sklProcess.id)
 
 		surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
 		ctx = cairo.Context (surface)

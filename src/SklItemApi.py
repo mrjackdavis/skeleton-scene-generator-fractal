@@ -3,6 +3,7 @@ import json
 from nap.url import Url
 from SklItem import SklItem
 from SklProcess import SklProcess
+from datetime import datetime
 
 class SklItemApi:
 	"""Skeleton Scene Item"""
@@ -38,7 +39,8 @@ class SklItemApi:
 		sceneObjs = []
 
 		for scene in scenes:
-			item = SklItem(scene['_id'],scene['resource']['location'])
+			logging.debug(scene)
+			item = SklItem(scene['sceneID'],scene['dateCreated'],scene['resource']['location'])
 
 			logging.info('Found item with resource location "%s"',item.resourceURL)
 
@@ -53,7 +55,7 @@ class SklItemApi:
 		return sceneObjs
 
 	def StartProcessing(self, sklItem):
-		response = self.api.post('scene/%s/processes' % (sklItem.id), data=json.dumps({'status': 'InProgress'}),headers=self.jsonHeader)
+		response = self.api.post('scene/%s/%s/processes' % (sklItem.id,sklItem.timestamp), data=json.dumps({'status': 'InProgress'}),headers=self.jsonHeader)
 		
 		if response.status_code != 201:
 			raise Exception('Creating a new process in the skeleton API failed. Received %s status code',response.status_code)
@@ -73,12 +75,12 @@ class SklItemApi:
 	# 	logging.debug(response)
 
 	def CompleteProcessing(self,sklProcess):
-		processUrl = 'scene/%s/processes/%s' % (sklProcess.sklItem.id,sklProcess.id)
+		processUrl = 'scene/%s/%s/processes/%s' % (sklProcess.sklItem.id,sklProcess.sklItem.timestamp,sklProcess.id)
 		logging.debug('Marking process %s as complete',processUrl)
 
 		response = self.api.put(processUrl, data=json.dumps({'status': 'Complete','result': '%s' % (sklProcess.result)}),headers=self.jsonHeader)
 
-		if response.status_code != 200:
+		if response.status_code != 201:
 			raise Exception('Completing item %s, process %s; failed with status code %s' % (sklProcess.sklItem.id,sklProcess.id,response.status_code))
 
 		logging.debug(response)

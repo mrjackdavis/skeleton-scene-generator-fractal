@@ -2,8 +2,9 @@ import urllib.request
 
 class SklItem:
 	"""Skeleton Scene Item"""
-	def __init__(self,sceneId,resourceURL):
+	def __init__(self,sceneId,timestamp,resourceURL):
 		self.id = sceneId
+		self.timestamp = timestamp
 		self.processes = []
 		self.resourceURL = resourceURL
 

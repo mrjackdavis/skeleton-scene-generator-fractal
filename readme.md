@@ -26,7 +26,7 @@ It's also necesary to set `S3_ACCESS_KEY` and `S3_SECRET_KEY`
 
 *Using container linking*
 
-    docker run --name skl-fractal --link skl-api:api -e "S3_ACCESS_KEY=yourKey" -e "S3_SECRET_KEY=yourSecret" -d mrjackdavis/skeleton-scene-generator-fractal
+    docker run --name skl-fractal --link skl-api:api -e S3_ACCESS_KEY="yourKey" -e S3_SECRET_KEY="yourSecret" -d mrjackdavis/skeleton-scene-generator-fractal
 
 Then, you can navigate to http://localhost:8080 and voila.
 

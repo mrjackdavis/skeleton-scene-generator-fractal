@@ -5,7 +5,7 @@ import cairocffi as cairo
 import logging
 
 index = 0
-MAX_LEVEL = 5
+MAX_LEVEL = 2
 
 class Coordinates(object):
 	def __init__(self,x,y):
@@ -43,12 +43,12 @@ def new(sklProcess):
 		ctx.set_source_rgb (0.5,0.5,0.5)
 		ctx.fill ()
 
+		PI = math.pi
 		index = 0
 		startPoint = Coordinates(0.5,0.5)
-		angleVarience = 0.3
+		angleVarience = PI/2
 		numberOfStartingPoints = 4
 		i = 0
-		PI = math.pi
 
 		while i <= numberOfStartingPoints:
 			Iterate(ctx,1,(i/numberOfStartingPoints*PI)*2-angleVarience,startPoint,angleVarience,sklItem)
@@ -66,7 +66,7 @@ def Iterate(ctx,currentLevel,currentAngle,currentCoordinates,angleVarience,sklIt
 	bytePoint = (index*7*3)%len(sklItem.resourceData)
 	byte = sklItem.resourceData[bytePoint]
 
-	length = 0.05
+	length =  MAX_LEVEL/currentLevel * 0.05
 
 	newAngle = currentAngle+angleVarience
 
@@ -84,7 +84,21 @@ def Iterate(ctx,currentLevel,currentAngle,currentCoordinates,angleVarience,sklIt
 	ctx.stroke ()
 
 	index = index + 1
-
+	
 	if currentLevel <= MAX_LEVEL:
-		Iterate(ctx,currentLevel +1,newAngle,newCoordinates,angleVarience*-1,sklItem)
+		numberOfNewBranches = 4
+		# Start at 1 to ignore first line
+		i = 1
+
+		# First line
 		Iterate(ctx,currentLevel +1,newAngle,newCoordinates,angleVarience,sklItem)
+
+		# Lines inbetween
+		while i < numberOfNewBranches - 1:
+			variance = angleVarience + (angleVarience*-1 - angleVarience) * i/(numberOfNewBranches - 1)
+			i = i+1
+			Iterate(ctx,currentLevel +1,newAngle,newCoordinates,variance,sklItem)
+
+		# Last line
+		Iterate(ctx,currentLevel +1,newAngle,newCoordinates,angleVarience*-1,sklItem)
+

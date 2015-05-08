@@ -11,6 +11,8 @@ class Coordinates(object):
 	def __init__(self,x,y):
 		self.x = x
 		self.y = y
+	def __str__(self):
+		return "(%s,%s)" % (self.x, self.y)
 
 def new(sklProcess):
 	sklItem = sklProcess.sklItem
@@ -43,34 +45,46 @@ def new(sklProcess):
 
 		index = 0
 		startPoint = Coordinates(0.5,0.5)
-		Iterate(ctx,1,1,startPoint,0,sklItem)
+		angleVarience = 0.3
+		numberOfStartingPoints = 4
+		i = 0
+		PI = math.pi
+
+		while i <= numberOfStartingPoints:
+			Iterate(ctx,1,(i/numberOfStartingPoints*PI)*2-angleVarience,startPoint,angleVarience,sklItem)
+			i = i + 1
+
 
 		surface.write_to_png (fileLocation) # Output to PNG
 
 		return fileLocation
 
-def Iterate(ctx,currentLevel,currentAngle,currentCoordinates,xMod,sklItem):
+def Iterate(ctx,currentLevel,currentAngle,currentCoordinates,angleVarience,sklItem):
 	global index
 	ctx.move_to (currentCoordinates.x, currentCoordinates.y)
 
 	bytePoint = (index*7*3)%len(sklItem.resourceData)
 	byte = sklItem.resourceData[bytePoint]
 
-	length = ((byte/500)*((currentLevel%MAX_LEVEL)/40)*(index%byte/11)-(byte/1234))
-	modD = (byte/100)
+	length = 0.05
 
-	newCoordinates = Coordinates(currentCoordinates.x + length*xMod,currentCoordinates.y-length)
+	newAngle = currentAngle+angleVarience
 
-	# logging.debug('at level %s, index %s : bytePoint = %s; byte = %s; length = %s; modD = %s;',currentLevel,index,bytePoint,byte,length,modD)
+	newX = length * math.cos(newAngle) + currentCoordinates.x
+	newY = length * math.sin(newAngle) + currentCoordinates.y
+
+	newCoordinates = Coordinates(newX,newY)
+
+	logging.debug('Drawing line from %s to %s',currentCoordinates,newCoordinates)
 
 	ctx.line_to (newCoordinates.x, newCoordinates.y) # Line to (x,y)
 
 	ctx.set_source_rgb ((currentLevel/10)%1, ((index*0.0002)*currentLevel*0.3)%1, (index*0.003)%1) # Solid color
-	ctx.set_line_width (((index*0.0002)*(byte*0.03)*0.3)%0.05)
+	ctx.set_line_width ((MAX_LEVEL/currentLevel)/1000)
 	ctx.stroke ()
 
 	index = index + 1
 
 	if currentLevel <= MAX_LEVEL:
-		Iterate(ctx,currentLevel +1,currentAngle,newCoordinates,xMod+modD,sklItem)
-		Iterate(ctx,currentLevel +1,currentAngle,newCoordinates,xMod-modD,sklItem)
+		Iterate(ctx,currentLevel +1,newAngle,newCoordinates,angleVarience*-1,sklItem)
+		Iterate(ctx,currentLevel +1,newAngle,newCoordinates,angleVarience,sklItem)

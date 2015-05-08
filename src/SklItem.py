@@ -1,3 +1,4 @@
+import logging
 import urllib.request
 
 class SklItem:
@@ -10,4 +11,7 @@ class SklItem:
 
 	def GetData(self):
 		response = urllib.request.urlopen(self.resourceURL)
-		return response.read()
+
+		readResponse = list(response.read())
+
+		return readResponse

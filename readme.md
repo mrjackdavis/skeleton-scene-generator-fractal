@@ -33,3 +33,7 @@ Then, you can navigate to http://localhost:8080 and voila.
 You can also mount `./src/` into the container so that it doesn't need to be re-run every time you make a change. You can do this by adding the following parameter:
 
     -v $(pwd)/src/:/app/
+
+## Testing
+
+For quick and dirty testing, use `test.py` and add `/app/test.py` to the end of the docker command

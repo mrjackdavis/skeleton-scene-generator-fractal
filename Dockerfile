@@ -8,6 +8,8 @@ RUN pip install boto
 
 ADD ./src/* /app/
 
-CMD [ "python", "/app/main.py" ]
+ENTRYPOINT ["python"]
+
+CMD ["/app/main.py"]
 
 EXPOSE 5000

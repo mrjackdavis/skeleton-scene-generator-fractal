@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG)
 logging.info('Running test')
 
 item = SklItem('test',time.time(),'http://www.google.com')
-process = SklProcess('1',item,"InProgress")
+process = SklProcess(time.time(),item,"InProgress")
 
 fileLocation = generator.new(process)
 logging.info("Finished generating %s",item.id)

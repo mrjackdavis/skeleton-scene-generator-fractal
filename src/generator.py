@@ -5,12 +5,18 @@ import cairocffi as cairo
 import logging
 
 index = 0
+MAX_LEVEL = 5
+
+class Coordinates(object):
+	def __init__(self,x,y):
+		self.x = x
+		self.y = y
 
 def new(sklProcess):
 	sklItem = sklProcess.sklItem
 	global index
 
-	WIDTH, HEIGHT, ITERATIONS = 5000, 5000, 11
+	WIDTH, HEIGHT = 5000, 5000
 
 	fileLocation = "/app/%s-%s.png" % (sklItem.id,sklProcess.id)
 
@@ -36,27 +42,28 @@ def new(sklProcess):
 		ctx.fill ()
 
 		index = 0
-		Iterate(ctx,1,ITERATIONS,0.5, 0.5,0,sklItem)
+		startPoint = Coordinates(0.5,0.5)
+		Iterate(ctx,1,1,startPoint,0,sklItem)
 
 		surface.write_to_png (fileLocation) # Output to PNG
 
 		return fileLocation
 
-def Iterate(ctx,currentLevel,maxLevel,x,y,xMod,sklItem):
+def Iterate(ctx,currentLevel,currentAngle,currentCoordinates,xMod,sklItem):
 	global index
-	ctx.move_to (x, y)
+	ctx.move_to (currentCoordinates.x, currentCoordinates.y)
 
 	bytePoint = (index*7*3)%len(sklItem.resourceData)
 	byte = sklItem.resourceData[bytePoint]
 
-	length = ((byte/500)*((currentLevel%maxLevel)/40)*(index%byte/11)-(byte/1234))
+	length = ((byte/500)*((currentLevel%MAX_LEVEL)/40)*(index%byte/11)-(byte/1234))
 	modD = (byte/100)
-	newY = y-length
-	newX = x + length*xMod
+
+	newCoordinates = Coordinates(currentCoordinates.x + length*xMod,currentCoordinates.y-length)
 
 	# logging.debug('at level %s, index %s : bytePoint = %s; byte = %s; length = %s; modD = %s;',currentLevel,index,bytePoint,byte,length,modD)
 
-	ctx.line_to (newX, newY) # Line to (x,y)
+	ctx.line_to (newCoordinates.x, newCoordinates.y) # Line to (x,y)
 
 	ctx.set_source_rgb ((currentLevel/10)%1, ((index*0.0002)*currentLevel*0.3)%1, (index*0.003)%1) # Solid color
 	ctx.set_line_width (((index*0.0002)*(byte*0.03)*0.3)%0.05)
@@ -64,6 +71,6 @@ def Iterate(ctx,currentLevel,maxLevel,x,y,xMod,sklItem):
 
 	index = index + 1
 
-	if currentLevel <= maxLevel:
-		Iterate(ctx,currentLevel +1,maxLevel,newX,newY,xMod+modD,sklItem)
-		Iterate(ctx,currentLevel +1,maxLevel,newX,newY,xMod-modD,sklItem)
+	if currentLevel <= MAX_LEVEL:
+		Iterate(ctx,currentLevel +1,currentAngle,newCoordinates,xMod+modD,sklItem)
+		Iterate(ctx,currentLevel +1,currentAngle,newCoordinates,xMod-modD,sklItem)

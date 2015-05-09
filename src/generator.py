@@ -1,62 +1,164 @@
 #!/usr/bin/env python
+import os
 import math
 import cairocffi as cairo
 import logging
+import numpy as np
 
 index = 0
+MAX_LEVEL = 10
 
-def new(sklItem):
+class Coordinates(object):
+	def __init__(self,x,y):
+		self.x = x
+		self.y = y
+	def __str__(self):
+		return "(%s,%s)" % (self.x, self.y)
+
+class FractalContextStats(object):
+	def __init__(self,median,mean,stddev,dataSize,minimum,maximum):
+		self.median = median
+		self.mean = mean
+		self.stddev = stddev
+		self.dataSize = dataSize
+		self.minimum = minimum
+		self.maximum = maximum
+	def __str__(self):
+		return 'length/median/mean/stddev/min/max     %s/%s/%s/%s/%s/%s' % (self.dataSize,self.median,self.mean,self.stddev,self.minimum,self.maximum)
+
+class FractalIteration(object):
+	def __init__(self,angle,angleVar,colR,colG,colB):
+		self.angle = angle
+		self.angleVar = angleVar
+		self.colR = colR
+		self.colG = colG
+		self.colB = colB
+
+class FractalContext(object):
+	def __init__(self,stats,ittr):
+		self.stats = stats
+		self.thisItr = ittr
+		self.lastItr = ittr
+	def nextIteration(self,ittr):
+		self.lastItr = self.thisItr
+		self.thisItr = ittr
+	def getIteration(self):
+		return self.thisItr
+	def deltaIteration(self):
+		angle = self.lastItr.angle - self.thisItr.angle
+		angleVar = self.lastItr.angleVar - self.thisItr.angleVar
+		colR = self.lastItr.colR - self.thisItr.colR
+		colG = self.lastItr.colG - self.thisItr.colG
+		colB = self.lastItr.colB - self.thisItr.colB
+		return FractalIteration(angle,angleVar,colR,colG,colB)
+
+
+def new(sklProcess):
+	sklItem = sklProcess.sklItem
 	global index
-	print("Hello world")
 
-	WIDTH, HEIGHT, ITERATIONS = 5000, 5000, 11
+	WIDTH, HEIGHT = 5000, 5000
 
-	surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
-	ctx = cairo.Context (surface)
+	fileLocation = "/app/%s-%s.png" % (sklItem.id,sklProcess.id)
 
-	ctx.scale (WIDTH, HEIGHT) # Normalizing the canvas
+	if os.path.isfile(fileLocation):
+		logging.warning("Cannot generate item[%s]. %s already exists",sklItem.id,fileLocation)
+	else:
+		logging.info("Getting URL data for scene %s from %s",sklItem.id, sklItem.resourceURL)
+		sklItem.resourceData = sklItem.GetData()
 
-	# pat = cairo.LinearGradient (0.0, 0.0, 0.0, 1.0)
-	# pat.add_color_stop_rgba (1, 0.7, 0, 0, 0.5) # First stop, 50% opacity
-	# pat.add_color_stop_rgba (0, 0.9, 0.7, 0.2, 1) # Last stop, 100% opacity
+		logging.debug(type(sklItem.resourceData))
 
-	ctx.rectangle (0, 0, 1, 1) # Rectangle(x0, y0, x1, y1)
-	ctx.set_source_rgb (0.5,0.5,0.5)
-	ctx.fill ()
+		logging.info("Creating fractal for %s:%s",sklItem.id, sklProcess.id)
 
-	index = 0
-	Iterate(ctx,1,ITERATIONS,0.5, 0.5,0,sklItem)
+		surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
+		ctx = cairo.Context (surface)
 
-	
-	fileLocation = "/app/example.png";
+		ctx.scale (WIDTH, HEIGHT) # Normalizing the canvas
 
-	surface.write_to_png (fileLocation) # Output to PNG
+		# pat = cairo.LinearGradient (0.0, 0.0, 0.0, 1.0)
+		# pat.add_color_stop_rgba (1, 0.7, 0, 0, 0.5) # First stop, 50% opacity
+		# pat.add_color_stop_rgba (0, 0.9, 0.7, 0.2, 1) # Last stop, 100% opacity
 
-	return fileLocation
+		ctx.rectangle (0, 0, 1, 1) # Rectangle(x0, y0, x1, y1)
+		ctx.set_source_rgb (1,1,1)
+		ctx.fill ()
 
-def Iterate(ctx,currentLevel,maxLevel,x,y,xMod,sklItem):
+		stats = FractalContextStats(np.median(sklItem.resourceData),np.mean(sklItem.resourceData),np.mean(sklItem.resourceData),len(sklItem.resourceData),min(sklItem.resourceData),max(sklItem.resourceData))
+
+
+		logging.debug(stats)
+
+		PI = math.pi
+		index = 0
+
+		startPoint = Coordinates(0.5,0.5) # Middle
+		angleVarience = stats.dataSize % PI/1.5
+		numberOfStartingPoints = stats.mean*100 % 9
+		i = 0
+
+		while i <= numberOfStartingPoints:
+			frtCtx = FractalContext(stats,FractalIteration((i/numberOfStartingPoints*PI)*2-angleVarience,angleVarience,0,0,0))
+			Iterate(frtCtx,ctx,1,(i/numberOfStartingPoints*PI)*2-angleVarience,startPoint,angleVarience,sklItem)
+			i = i + 1
+
+
+		surface.write_to_png (fileLocation) # Output to PNG
+
+		return fileLocation
+
+def Iterate(frtCtx,ctx,currentLevel,currentAngle,currentCoordinates,angleVarience,sklItem):
 	global index
-	ctx.move_to (x, y)
+	ctx.move_to (currentCoordinates.x, currentCoordinates.y)
 
-	bytePoint = (index*7*3)%len(sklItem.resourceData)
-	byte = sklItem.resourceData[bytePoint]
+	bytePoint1 = ((index+1)*7)%len(sklItem.resourceData)
+	bytePoint2 = ((index+1)*3)%len(sklItem.resourceData)
+	bytePoint3 = ((index+1)*13)%len(sklItem.resourceData)
+	byte1 = sklItem.resourceData[bytePoint1]
+	byte2 = sklItem.resourceData[bytePoint2]
+	byte3 = sklItem.resourceData[bytePoint3]
 
-	length = ((byte/500)*((currentLevel%maxLevel)/40)*(index%byte/11)-(byte/1234))
-	modD = (byte/100)
-	newY = y-length
-	newX = x + length*xMod
+	length =  ((MAX_LEVEL/currentLevel * 0.02) + (100/byte1)/100) % 0.1
 
-	logging.debug('at level %s, index %s : bytePoint = %s; byte = %s; length = %s; modD = %s;',currentLevel,index,bytePoint,byte,length,modD)
-	# logging.debug('(%s,%s) to (%s,%s) at %s',x,y,newX,newY,currentLevel)
+	newAngle = currentAngle+angleVarience
 
-	ctx.line_to (newX, newY) # Line to (x,y)
+	newX = length * math.cos(newAngle) + currentCoordinates.x
+	newY = length * math.sin(newAngle) + currentCoordinates.y
 
-	ctx.set_source_rgb ((currentLevel/10)%1, ((index*0.0002)*currentLevel*0.3)%1, (index*0.003)%1) # Solid color
-	ctx.set_line_width (((index*0.0002)*(byte*0.03)*0.3)%0.05)
+	newCoordinates = Coordinates(newX,newY)
+
+	# logging.debug('Drawing line from %s to %s',currentCoordinates,newCoordinates)
+
+	ctx.line_to (newCoordinates.x, newCoordinates.y) # Line to (x,y)
+
+	r = frtCtx.getIteration().colR + byte1 / 1000
+	g = frtCtx.getIteration().colG + byte2 / 1000
+	b = frtCtx.getIteration().colB + byte3 / 1000
+
+	ctx.set_source_rgb (r,g,b) # Solid color
+	ctx.set_line_width ((MAX_LEVEL/currentLevel)/1000)
 	ctx.stroke ()
 
 	index = index + 1
+	
+	if currentLevel <= MAX_LEVEL:
+		newContext = FractalContext(frtCtx.stats,frtCtx.getIteration())
+		newContext.nextIteration(FractalIteration(newAngle,angleVarience,r,g,b))
 
-	if currentLevel <= maxLevel:
-		Iterate(ctx,currentLevel +1,maxLevel,newX,newY,xMod+modD,sklItem)
-		Iterate(ctx,currentLevel +1,maxLevel,newX,newY,xMod-modD,sklItem)
+		numberOfNewBranches = (byte1 + byte2 + byte3)/100%4
+		# Start at 1 to ignore first line
+		i = 1
+
+		# First line
+		Iterate(newContext,ctx,currentLevel +1,newAngle,newCoordinates,angleVarience,sklItem)
+
+		# Lines inbetween
+		while i < numberOfNewBranches - 1:
+			variance = angleVarience + (angleVarience*-1 - angleVarience) * i/(numberOfNewBranches - 1)
+			i = i+1
+			extraVariance = variance + 100 -(byte1 + byte2 + byte3)/1000%100
+			Iterate(newContext,ctx,currentLevel +1,newAngle,newCoordinates,variance,sklItem)
+
+		# Last line
+		Iterate(newContext,ctx,currentLevel +1,newAngle,newCoordinates,angleVarience*-1,sklItem)
+

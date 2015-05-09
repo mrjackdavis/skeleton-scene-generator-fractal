@@ -6,6 +6,7 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from boto.s3.connection import Location
 from SklItemApi import SklItemApi
+from ImageCompressor import compress
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -28,12 +29,14 @@ while True:
 		if not fileLocation:
 			raise Exception("File location was null")
 
-		logging.info("Uploading %s:%s (%s) to S3",item.id,process.id,fileLocation)
+		compressedFile = compress(fileLocation,50)
+
+		logging.info("Uploading %s:%s (%s) to S3",item.id,process.id,compressedFile)
 		
 		bucket = s3Connection.get_bucket('skeleton-scene-app-web')
 		k  = Key(bucket)
 		k.key = 'generators/fractal/%s-%s.png' % (item.id,process.id)
-		k.set_contents_from_filename(fileLocation)
+		k.set_contents_from_filename(compressedFile)
 		k.set_canned_acl('public-read')
 
 		process.result="http://skeleton-scene-app-web.s3-website-ap-southeast-2.amazonaws.com/%s" % (k.key)

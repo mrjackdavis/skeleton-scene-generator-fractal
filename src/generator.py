@@ -131,9 +131,9 @@ def Iterate(frtCtx,ctx,currentLevel,currentAngle,currentCoordinates,angleVarienc
 
 	ctx.line_to (newCoordinates.x, newCoordinates.y) # Line to (x,y)
 
-	r = frtCtx.getIteration().colR + frtCtx.deltaIteration().colR/10000 + (byte1/1200)%0.000077
-	g = frtCtx.getIteration().colG + frtCtx.deltaIteration().colG/10000 + (byte2/1200)%0.000077
-	b = frtCtx.getIteration().colB + frtCtx.deltaIteration().colB/10000 + (byte3/1200)%0.000077
+	r = frtCtx.getIteration().colR + 0.1
+	g = frtCtx.getIteration().colG + 0.1
+	b = frtCtx.getIteration().colB + 0.1
 
 	ctx.set_source_rgb (r,g,b) # Solid color
 	ctx.set_line_width ((MAX_LEVEL/currentLevel)/1000)
@@ -142,22 +142,23 @@ def Iterate(frtCtx,ctx,currentLevel,currentAngle,currentCoordinates,angleVarienc
 	index = index + 1
 	
 	if currentLevel <= MAX_LEVEL:
-		frtCtx.nextIteration(FractalIteration(newAngle,angleVarience,r,g,b))
+		newContext = FractalContext(frtCtx.stats,frtCtx.getIteration())
+		newContext.nextIteration(FractalIteration(newAngle,angleVarience,r,g,b))
 
 		numberOfNewBranches = (byte1 + byte2 + byte3)/100%4
 		# Start at 1 to ignore first line
 		i = 1
 
 		# First line
-		Iterate(frtCtx,ctx,currentLevel +1,newAngle,newCoordinates,angleVarience,sklItem)
+		Iterate(newContext,ctx,currentLevel +1,newAngle,newCoordinates,angleVarience,sklItem)
 
 		# Lines inbetween
 		while i < numberOfNewBranches - 1:
 			variance = angleVarience + (angleVarience*-1 - angleVarience) * i/(numberOfNewBranches - 1)
 			i = i+1
 			extraVariance = variance + 100 -(byte1 + byte2 + byte3)/1000%100
-			Iterate(frtCtx,ctx,currentLevel +1,newAngle,newCoordinates,variance,sklItem)
+			Iterate(newContext,ctx,currentLevel +1,newAngle,newCoordinates,variance,sklItem)
 
 		# Last line
-		Iterate(frtCtx,ctx,currentLevel +1,newAngle,newCoordinates,angleVarience*-1,sklItem)
+		Iterate(newContext,ctx,currentLevel +1,newAngle,newCoordinates,angleVarience*-1,sklItem)
 

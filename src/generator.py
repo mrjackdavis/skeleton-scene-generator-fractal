@@ -131,9 +131,9 @@ def Iterate(frtCtx,ctx,currentLevel,currentAngle,currentCoordinates,angleVarienc
 
 	ctx.line_to (newCoordinates.x, newCoordinates.y) # Line to (x,y)
 
-	r = frtCtx.getIteration().colR + 0.1
-	g = frtCtx.getIteration().colG + 0.1
-	b = frtCtx.getIteration().colB + 0.1
+	r = frtCtx.getIteration().colR + byte1 / 1000
+	g = frtCtx.getIteration().colG + byte2 / 1000
+	b = frtCtx.getIteration().colB + byte3 / 1000
 
 	ctx.set_source_rgb (r,g,b) # Solid color
 	ctx.set_line_width ((MAX_LEVEL/currentLevel)/1000)

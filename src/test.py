@@ -7,6 +7,7 @@ from boto.s3.key import Key
 from boto.s3.connection import Location
 from SklItem import SklItem
 from SklProcess import SklProcess
+from ImageCompressor import compress
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -18,9 +19,13 @@ item = SklItem('test',time.time(),'http://www.google.com')
 process = SklProcess(time.time(),item,"InProgress")
 
 fileLocation = generator.new(process)
+
 logging.info("Finished generating %s",item.id)
 
 if not fileLocation:
 	raise Exception("File location was null")
 
 logging.info('Generated result for %s. Found at %s',item.id,fileLocation)
+
+compressedFile = compress(fileLocation,50)
+logging.info('Compressed version can be found at %s',compressedFile)

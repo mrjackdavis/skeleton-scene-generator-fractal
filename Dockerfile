@@ -6,6 +6,7 @@ RUN pip install cairocffi
 RUN pip install nap
 RUN pip install boto
 RUN pip install numpy
+RUN pip install Pillow
 
 ADD ./src/* /app/
 

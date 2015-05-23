@@ -8,7 +8,22 @@ def compress(pathToImage, quality):
 	outfile = "%s/%s-at-quality%s%%.jpg" % (head,fileName,str(quality)) 
 	#open previously generated file
 	compImg = pil.open(pathToImage)
-	#compress file at 50% of previous quality
+	compImg.save(outfile, "JPEG", quality=quality)
+
+	return outfile
+
+def compressAndScale(pathToImage, quality, newSize):
+	head, tail = os.path.split(pathToImage)
+	fileName, ext = os.path.splitext(tail)
+
+	outfile = "%s/%s-at-quality%s%%.jpg" % (head,fileName,str(quality)) 
+	size = newSize, newSize
+
+	#open previously generated file
+	compImg = pil.open(pathToImage)
+
+	compImg.thumbnail(size, pil.ANTIALIAS)
+
 	compImg.save(outfile, "JPEG", quality=quality)
 
 	return outfile

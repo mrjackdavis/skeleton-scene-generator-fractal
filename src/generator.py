@@ -53,13 +53,12 @@ class FractalContext(object):
 		return FractalIteration(angle,angleVar,colR,colG,colB)
 
 
-def new(sklProcess):
-	sklItem = sklProcess.sklItem
+def new(sklItem):
 	global index
 
 	WIDTH, HEIGHT = 5000, 5000
 
-	fileLocation = "/app/%s-%s.png" % (sklItem.id,sklProcess.id)
+	fileLocation = "/app/%s.png" % (sklItem.id)
 
 	if os.path.isfile(fileLocation):
 		logging.warning("Cannot generate item[%s]. %s already exists",sklItem.id,fileLocation)
@@ -69,7 +68,7 @@ def new(sklProcess):
 
 		logging.debug(type(sklItem.resourceData))
 
-		logging.info("Creating fractal for %s:%s",sklItem.id, sklProcess.id)
+		logging.info("Creating fractal for %s",sklItem.id)
 
 		surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
 		ctx = cairo.Context (surface)

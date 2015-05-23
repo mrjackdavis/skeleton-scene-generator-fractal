@@ -2,7 +2,6 @@ import logging
 import json
 from nap.url import Url
 from SklItem import SklItem
-from SklProcess import SklProcess
 from datetime import datetime
 
 class SklItemApi:
@@ -14,73 +13,40 @@ class SklItemApi:
 
 	def GetAllNew(self):
 		# Get scenes
-		allScenes = self.GetAll()
-		newScenes = []
-
-		# If any scenes have complete processes, then they aren't new
-		for scene in allScenes:
-			isNew = True
-			for process in scene.processes:
-				if process.status == "Complete":
-					isNew = False
-					break
-
-			if isNew == True:
-				logging.info('Scene %s is new. Queuing for processing', scene.id)
-				newScenes.append(scene)
-
-		return newScenes
-
-
-	def GetAll(self):
-		# Get scenes
-		scenes = self.api.get('scene').json()
+		scenes = self.api.get('scene-requests').json()
 
 		sceneObjs = []
 
 		for scene in scenes:
 			logging.debug(scene)
-			item = SklItem(scene['sceneID'],scene['dateCreated'],scene['resource']['location'])
+			item = SklItem(scene['sceneID'],scene['createdAt'],scene['resourceURI'])
 
 			logging.info('Found item with resource location "%s"',item.resourceURL)
-
-			i = 0
-			for process in scene['processes']:
-				processItem = SklProcess(i,item,process["status"])
-				i = i+1
-				item.processes.append(processItem)
 
 			sceneObjs.append(item)
 
 		return sceneObjs
 
 	def StartProcessing(self, sklItem):
-		response = self.api.post('scene/%s/%s/processes' % (sklItem.id,sklItem.timestamp), data=json.dumps({'status': 'InProgress'}),headers=self.jsonHeader)
+		response = self.api.put('scene-requests/%s/%s' % (sklItem.id,sklItem.timestamp), data=json.dumps({'status': 'IN_PROGRESS'}),headers=self.jsonHeader)
 		
-		if response.status_code != 201:
+		if response.status_code != 200:
 			raise Exception('Creating a new process in the skeleton API failed. Received %s status code',response.status_code)
 
-		processId = response.headers["location"].rsplit('/',1)[1];
+		logging.debug("Starting to process %s",sklItem.id)
 
-		logging.debug("Starting process %s",response.headers["location"])
-
-		processItem = SklProcess(processId,sklItem,"InProgress")
-
-		sklItem.processes.append(processItem)
-
-		return processItem
+		return
 
 	# def FailProcessing(self,process):
 	# 	response = self.api.put('scene/%s/processes/%s' % (sklItem.processes), data={'status': 'Failed'})
 	# 	logging.debug(response)
 
-	def CompleteProcessing(self,sklProcess):
-		processUrl = 'scene/%s/%s/processes/%s' % (sklProcess.sklItem.id,sklProcess.sklItem.timestamp,sklProcess.id)
-		logging.debug('Marking process %s as complete',processUrl)
+	def CompleteProcessing(self,sklItem):
+		logging.debug('Completing process %s',sklItem.id)
 
-		response = self.api.put(processUrl, data=json.dumps({'status': 'Complete','result': '%s' % (sklProcess.result)}),headers=self.jsonHeader)
-
+		response = self.api.post('scenes', data=json.dumps({'request':{ 'sceneID':sklItem.id,'createdAt':sklItem.timestamp }, 'result':{ 'URI':sklItem.resultURL, 'type':'IMAGE' }}),headers=self.jsonHeader)
+		
 		if response.status_code != 201:
-			raise Exception('Completing item %s, process %s; failed with status code %s' % (sklProcess.sklItem.id,sklProcess.id,response.status_code))
+			raise Exception('Completing item %s; failed with status code %s' % (sklItem.id,response.status_code))
 
 		logging.debug(response)

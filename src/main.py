@@ -43,10 +43,10 @@ while True:
 			raise Exception("File location was null")
 
 		resultFullSizeFilePath = compress(fileLocation,80)
-		resultThumbnailFilePath = compressAndScale(fileLocation,50,120)
+		resultThumbnailFilePath = compressAndScale(fileLocation,50,500)
 
 		item.resultURL=uploadItemToS3(resultFullSizeFilePath,item.id)
-		item.thumbnailURL=uploadItemToS3(resultThumbnailFilePath,item.id)
+		item.thumbnailURL=uploadItemToS3(resultThumbnailFilePath,"%s-thumbnail"%item.id)
 
 		sklApi.CompleteProcessing(item)
 

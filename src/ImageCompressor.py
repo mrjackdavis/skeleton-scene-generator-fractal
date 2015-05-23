@@ -16,7 +16,7 @@ def compressAndScale(pathToImage, quality, newSize):
 	head, tail = os.path.split(pathToImage)
 	fileName, ext = os.path.splitext(tail)
 
-	outfile = "%s/%s-at-quality%s%%.jpg" % (head,fileName,str(quality)) 
+	outfile = "%s/%s-%spx-at-quality%s%%.jpg" % (head,fileName,str(newSize),str(quality)) 
 	size = newSize, newSize
 
 	#open previously generated file

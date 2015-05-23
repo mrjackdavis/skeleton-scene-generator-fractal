@@ -44,7 +44,7 @@ class SklItemApi:
 	def CompleteProcessing(self,sklItem):
 		logging.debug('Completing process %s',sklItem.id)
 
-		response = self.api.post('scenes', data=json.dumps({'request':{ 'sceneID':sklItem.id,'createdAt':sklItem.timestamp }, 'result':{ 'URI':sklItem.resultURL, 'type':'IMAGE' }}),headers=self.jsonHeader)
+		response = self.api.post('scenes', data=json.dumps({'request':{ 'sceneID':sklItem.id,'createdAt':sklItem.timestamp }, 'result':{ 'URI':sklItem.resultURL, 'type':'IMAGE', 'thumbnailURI':sklItem.thumbnailURL }}),headers=self.jsonHeader)
 		
 		if response.status_code != 201:
 			raise Exception('Completing item %s; failed with status code %s' % (sklItem.id,response.status_code))

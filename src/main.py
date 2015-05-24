@@ -14,18 +14,23 @@ logging.basicConfig(level=logging.DEBUG)
 # Get API URL from environment
 apiLocation = os.environ['API_PORT'].replace('tcp://','http://') + '/v0-2/'
 sklApi = SklItemApi(apiLocation)
-s3Connection = S3Connection(os.environ['S3_ACCESS_KEY'],os.environ['S3_SECRET_KEY'])
+s3Connection = S3Connection(os.environ['S3_ACCESS_KEY'],os.environ['S3_SECRET_KEY'], host="s3-ap-southeast-2.amazonaws.com",
+)
 
 def uploadItemToS3(pathToImg,itemID):
 	logging.info("Uploading %s (%s) to S3",itemID,pathToImg)
 
-	bucket = s3Connection.get_bucket('skeleton-scene-app-web')
-	k  = Key(bucket)
-	k.key = 'generators/fractal/%s.png' % (itemID)
+	bucketName = 'toast-artefacts'
+
+	logging.info(s3Connection)
+
+	bucket = s3Connection.get_bucket(bucketName)
+	k = Key(bucket)
+	k.key = 'generators/snowflake/%s.png' % (itemID)
 	k.set_contents_from_filename(pathToImg)
 	k.set_canned_acl('public-read')
 
-	return "http://skeleton-scene-app-web.s3-website-ap-southeast-2.amazonaws.com/%s" % (k.key)
+	return "https://s3-ap-southeast-2.amazonaws.com/%s/%s" % (bucketName,k.key)
 
 
 while True:

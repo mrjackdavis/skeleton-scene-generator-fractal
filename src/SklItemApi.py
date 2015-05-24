@@ -13,6 +13,21 @@ class SklItemApi:
 
 	def GetAllNew(self):
 		# Get scenes
+		allScenes = self.GetAll()
+		newScenes = []
+
+		# If any scenes have complete processes, then they aren't new
+		for scene in allScenes:
+			isNew = True
+			
+			if scene.status == 'PENDING':
+				logging.info('Scene %s is new. Queuing for processing', scene.id)
+				newScenes.append(scene)
+
+		return newScenes
+
+	def GetAll(self):
+		# Get scenes
 		scenes = self.api.get('scene-requests').json()
 
 		sceneObjs = []
@@ -20,7 +35,7 @@ class SklItemApi:
 		for scene in scenes:
 			logging.debug(scene)
 			item = SklItem(scene['sceneID'],scene['createdAt'],scene['resourceURI'])
-
+			item.status = scene['status']
 			logging.info('Found item with resource location "%s"',item.resourceURL)
 
 			sceneObjs.append(item)
@@ -37,14 +52,20 @@ class SklItemApi:
 
 		return
 
-	# def FailProcessing(self,process):
-	# 	response = self.api.put('scene/%s/processes/%s' % (sklItem.processes), data={'status': 'Failed'})
-	# 	logging.debug(response)
+	def FailProcessing(self,sklItem):
+		response = self.api.put('scene-requests/%s/%s' % (sklItem.id,sklItem.timestamp), data=json.dumps({'status': 'FAILED'}),headers=self.jsonHeader)
+		
+		if response.status_code != 200:
+			raise Exception('Creating a new process in the skeleton API failed. Received %s status code',response.status_code)
+
+		logging.debug("Starting to process %s",sklItem.id)
+
+		return
 
 	def CompleteProcessing(self,sklItem):
 		logging.debug('Completing process %s',sklItem.id)
 
-		response = self.api.post('scenes', data=json.dumps({'request':{ 'sceneID':sklItem.id,'createdAt':sklItem.timestamp }, 'result':{ 'URI':sklItem.resultURL, 'type':'IMAGE' }}),headers=self.jsonHeader)
+		response = self.api.post('scenes', data=json.dumps({'request':{ 'sceneID':sklItem.id,'createdAt':sklItem.timestamp }, 'result':{ 'URI':sklItem.resultURL, 'type':'IMAGE', 'thumbnailURI':sklItem.thumbnailURL }}),headers=self.jsonHeader)
 		
 		if response.status_code != 201:
 			raise Exception('Completing item %s; failed with status code %s' % (sklItem.id,response.status_code))

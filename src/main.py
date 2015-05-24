@@ -40,22 +40,28 @@ while True:
 	logging.info('Found %s new requests',len(items))
 
 	for item in items:
-		sklApi.StartProcessing(item)
-		fileLocation = generator.new(item)
-		logging.info("Finished generating %s",item.id)
+		try:
+			sklApi.StartProcessing(item)
+			fileLocation = generator.new(item)
+			logging.info("Finished generating %s",item.id)
 
-		if not fileLocation:
-			raise Exception("File location was null")
+			if not fileLocation:
+				raise Exception("File location was null")
 
-		resultFullSizeFilePath = compress(fileLocation,80)
-		resultThumbnailFilePath = compressAndScale(fileLocation,50,500)
+			resultFullSizeFilePath = compress(fileLocation,80)
+			resultThumbnailFilePath = compressAndScale(fileLocation,50,500)
 
-		item.resultURL=uploadItemToS3(resultFullSizeFilePath,item.id)
-		item.thumbnailURL=uploadItemToS3(resultThumbnailFilePath,"%s-thumbnail"%item.id)
+			item.resultURL=uploadItemToS3(resultFullSizeFilePath,item.id)
+			item.thumbnailURL=uploadItemToS3(resultThumbnailFilePath,"%s-thumbnail"%item.id)
 
-		sklApi.CompleteProcessing(item)
+			sklApi.CompleteProcessing(item)
 
-		logging.info('Generated result for %s. Found at %s',item.id,item.resultURL)
+			logging.info('Generated result for %s. Found at %s',item.id,item.resultURL)
+		except Exception as e:
+			logging.error(e)
+			sklApi.FailProcessing(item)
+
+		
 
 
 	logging.info("Sleeping for 10...")

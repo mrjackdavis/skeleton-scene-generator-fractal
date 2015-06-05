@@ -7,6 +7,7 @@ RUN pip install nap
 RUN pip install boto
 RUN pip install numpy
 RUN pip install Pillow
+RUN pip install Toast_Python_SDK
 
 ADD ./src/* /app/
 

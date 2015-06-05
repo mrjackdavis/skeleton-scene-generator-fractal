@@ -6,12 +6,9 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from boto.s3.connection import Location
 from SklItem import SklItem
-from SklProcess import SklProcess
 from ImageCompressor import compress
 
 logging.basicConfig(level=logging.DEBUG)
-
-
 
 logging.info('Running test')
 

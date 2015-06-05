@@ -5,7 +5,7 @@ import logging
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from boto.s3.connection import Location
-from SklItemApi import SklItemApi
+from ToastItApi import ToastItApi
 from ImageCompressor import compress
 from ImageCompressor import compressAndScale
 
@@ -13,7 +13,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Get API URL from environment
 apiLocation = os.environ['API_PORT'].replace('tcp://','http://') + '/v0-2/'
-sklApi = SklItemApi(apiLocation)
+sklApi = ToastItApi(apiLocation)
+generatorName = "Snowflake"
 s3Connection = S3Connection(os.environ['S3_ACCESS_KEY'],os.environ['S3_SECRET_KEY'], host="s3-ap-southeast-2.amazonaws.com",
 )
 
@@ -26,7 +27,7 @@ def uploadItemToS3(pathToImg,itemID):
 
 	bucket = s3Connection.get_bucket(bucketName)
 	k = Key(bucket)
-	k.key = 'generators/snowflake/%s.png' % (itemID)
+	k.key = 'generators/%s/%s.png' % (generatorName,itemID)
 	k.set_contents_from_filename(pathToImg)
 	k.set_canned_acl('public-read')
 
@@ -35,7 +36,7 @@ def uploadItemToS3(pathToImg,itemID):
 
 while True:
 	logging.info('Checking for new requests')
-	items = sklApi.GetAllNew()
+	items = sklApi.GetAllNewForGenerator(generatorName)
 
 	logging.info('Found %s new requests',len(items))
 

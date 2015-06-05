@@ -12,7 +12,7 @@ When running the image, the environment variable `API_PORT` must be set to the u
 
 Specifying the url:
 
-    -e "API_PORT=http://api.skeletonscene.com"
+    -e "API_PORT=http://api.toast-it.io"
 
 OR with container linking:
 
